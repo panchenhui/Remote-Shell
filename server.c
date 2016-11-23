@@ -1,5 +1,5 @@
 /*
-    C socket server example
+    Server
 */
 
 #include <stdio.h>
@@ -9,12 +9,15 @@
 #include <arpa/inet.h>   // inet_addr
 #include <unistd.h>      // write
 
+#define BUFFER 1024
+
 int main(int argc , char *argv[])
 {
     // Variables
-    int ssock, csock, addrlen;
+    int ssock, csock, addrlen, read_size;
     struct sockaddr_in server, client;
     short port = 8888;
+    char commands[2000];
 
     // Create a socket. Return value is a file descriptor for the socket.
     ssock = socket(AF_INET, SOCK_STREAM, 0);
@@ -54,40 +57,52 @@ int main(int argc , char *argv[])
     }
     printf("Connection accepted\n");
 
+    // Receive commands from the client
+    while((read_size = read(csock, commands, sizeof(commands))) > 0 ){
+        commands[read_size] = '\0';
+        if(strcmp(commands, "end") == 0){
+            printf("The client has stopped sending commands\n");
+            break;
+        }
+        else{
+            printf("client sent command: %s\n", commands);
+        }
+    }
+    if(read_size == 0){
+        printf("Invalid command\n");
+    }
+
+
+    FILE *fp = fopen("server_log.txt", "rb");
+    if (fp == NULL)
+    {
+        printf("File open failed\n");
+        return 1;
+    }
 
     while(1){
+        unsigned char buffer[BUFFER] = {0};
+        int nread = fread(buffer,1, BUFFER, fp);
+        printf("Bytes read from the txt file: %d\n",nread);
 
-        FILE *fp = fopen("test.pdf", "rb");
-        if (fp == NULL)
+        if (nread > 0)
         {
-            printf("File open failed\n");
-            return 1;
+            printf("Sending...\n");
+            write(csock,buffer,nread);
         }
 
-        while(1){
-            unsigned char buffer[1024] = {0};
-            int nread = fread(buffer,1, 1024, fp);
-            printf("Bytes read %d\n",nread);
-
-            if (nread > 0)
-            {
-                printf("Sending\n");
-                write(csock,buffer,nread);
-            }
-
-             if (nread < 1024)
-            {
-                if (feof(fp))
-                    printf("End of file\n");
-                if (ferror(fp))
-                    printf("Error reading\n");
-                break;
-            }
+         if (nread < BUFFER)
+        {
+            if (feof(fp))
+                printf("End of file\n");
+            if (ferror(fp))
+                printf("Error reading\n");
+            break;
         }
     }
 
-    printf("The file has been sent\n");
 
+    printf("The file has been sent to the client\n");
 
     close(csock);
     close(ssock);
