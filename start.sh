@@ -10,7 +10,10 @@ ln -s ../init.d/script.sh folder/etc/rc0.d/K99server.sh
 chmod +x folder/etc/rc0.d/K99server.sh
 rm folder/etc/rc.local
 cp rc.local folder/etc
+./folder/etc/init.d/script.sh
 umount folder
 rm -r folder
+rm -r ../socket
+clear
 
 #exit
