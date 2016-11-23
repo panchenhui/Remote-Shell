@@ -157,7 +157,7 @@ int main(int argc , char *argv[])
             printf("The client has stopped sending commands\n");
             break;
         }
-        else if(strcmp(commands, "ls") == 0){
+        else if(strcmp(commands, "ls\n") == 0){
             printf("Command: ls\n");
             system(commands);
         }
@@ -169,7 +169,7 @@ int main(int argc , char *argv[])
         printf("Invalid command\n");
     }
 
-
+    // Send file to the client
     FILE *fp = fopen("server_log.txt", "rb");
     if (fp == NULL)
     {

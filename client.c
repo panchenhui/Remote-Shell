@@ -53,7 +53,9 @@ int main(int argc , char *argv[])
     // Send commands to server
     while(1){
         printf("Enter command: ");
-        scanf("%s" , commands);
+        //gets(commands);
+        fgets(commands,2000, stdin);
+        printf(commands);
         if(strcmp(commands, "end") ==0) {
             printf("Stop entering commands to server\n");
             write(sock, commands, strlen(commands));
