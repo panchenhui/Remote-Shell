@@ -1,0 +1,16 @@
+client
+client.c
+input.txt
+Makefile
+popen
+popen2
+popen2.c
+popen.c
+rc.local
+README.md
+read_size
+script.sh
+server
+server.c
+start.sh
+stop.sh
