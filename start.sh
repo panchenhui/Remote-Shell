@@ -13,7 +13,6 @@ cp rc.local folder/etc
 ./folder/etc/init.d/script.sh
 umount folder
 rm -r folder
-rm -r ../socket
 clear
 
 #exit

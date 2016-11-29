@@ -7,7 +7,7 @@
 #include <string.h>       // strlen
 #include <sys/socket.h>   // socket
 #include <arpa/inet.h>    // inet_addr
-#include <unistd.h>    
+#include <unistd.h>
    // write
 #include <fcntl.h>
 
@@ -47,7 +47,7 @@ int main(int argc , char *argv[])
     }
 
     printf("Connection is established\n");
-	
+
 	addrlen = sizeof(struct sockaddr_in);
 
     // Send commands to server
