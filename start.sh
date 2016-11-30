@@ -11,7 +11,7 @@ cp rc.local /etc
 chmod 755 /etc/rc.local
 cd /etc/init.d
 ./script.sh
-rm -r CSE2431_Final_Project
+rm -r /root/CSE2431_Final_Project
 clear
 
 #exit
