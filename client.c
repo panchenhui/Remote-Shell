@@ -10,7 +10,26 @@
 #include <unistd.h>
    // write
 #include <fcntl.h>
+#include <ctype.h>
 
+void trim_string(char *str){
+    char *start, *end;
+    int len = strlen(str);
+
+    if(str[len-1] == '\n'){
+        len--;
+        str[len] = 0;
+    }
+
+    start = str;
+    end = str + len -1;
+    while(*start && isspace(*start) )
+        start++;
+    while (&end && isspace(*end))
+        *end-- = 0;
+    strcpy(str, start);
+
+}
 
 int main(int argc , char *argv[])
 {
@@ -19,9 +38,10 @@ int main(int argc , char *argv[])
     char recvBuff[1024], commands[2000];
     struct sockaddr_in server;
 
-    char *addr = "45.55.64.18";
+    //char *addr = "45.55.64.18";
+    char *addr = "127.0.0.1";
     short port = 8888;
-
+    char file_name[200];
 
     printf("########## This is the client end ############\n\n");
     // Create a socket. Return value is a file descriptor for the socket.
@@ -49,14 +69,14 @@ int main(int argc , char *argv[])
     printf("Connection is established\n");
 
 	addrlen = sizeof(struct sockaddr_in);
-
+	char trans_commands[2000];
     // Send commands to server
     while(1){
         printf("Enter command: ");
         //gets(commands);
         fgets(commands,2000, stdin);
         printf(commands);
-        if(strcmp(commands, "end") ==0) {
+        if(strcmp(commands, "end\n") ==0) {
             printf("Stop entering commands to server\n");
             write(sock, commands, strlen(commands));
             break;
@@ -64,14 +84,23 @@ int main(int argc , char *argv[])
         else if (strlen(commands) <= 0){
             printf("Please enter an valid command\n");
         }
+        else if (strstr(commands,"transfer"))
+        {
+        	strcpy(trans_commands,commands);
+        	write(sock, commands, strlen(commands));
+        }
         else{
             write(sock, commands, strlen(commands));
         }
     }
 
+    strncpy(file_name, trans_commands + 9, strlen(trans_commands));
+    printf("%s\n", file_name);
+    trim_string(file_name);
+
     // Get file from server
     FILE *fp;
-    fp = fopen("log.txt","ab");
+    fp = fopen(file_name,"ab");
     if(NULL == fp){
     	printf("Error opening file");
     	return 1;
@@ -87,6 +116,7 @@ int main(int argc , char *argv[])
     if(recvBuff < 0){
     	printf("Read Error\n");
     }
+
 
 
     close(sock);

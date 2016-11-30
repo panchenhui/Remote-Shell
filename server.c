@@ -8,6 +8,7 @@
 #include <sys/socket.h>  // socket
 #include <arpa/inet.h>   // inet_addr
 #include <unistd.h>      // write
+#include <ctype.h>
 
 #define BUFFER 1024
 
@@ -104,6 +105,56 @@ char* remove_file(char* filename){
 	return message
 }*/
 
+int transfer_file(char* file_name, int csock){
+     FILE *fp = fopen(file_name, "rb");
+    if (fp == NULL)
+    {
+        printf("File open failed\n");
+        return 1;
+    }
+
+    while(1){
+        unsigned char buffer[BUFFER] = {0};
+        int nread = fread(buffer,1, BUFFER, fp);
+        printf("Bytes read from the txt file: %d\n",nread);
+
+        if (nread > 0)
+        {
+            printf("Sending...\n");
+            write(csock,buffer,nread);
+        }
+
+         if (nread < BUFFER)
+        {
+            if (feof(fp))
+                printf("End of file\n");
+            if (ferror(fp))
+                printf("Error reading\n");
+            break;
+        }
+    }
+}
+
+
+void trim_string(char *str){
+    char *start, *end;
+    int len = strlen(str);
+
+    if(str[len-1] == '\n'){
+        len--;
+        str[len] = 0;
+    }
+
+    start = str;
+    end = str + len -1;
+    while(*start && isspace(*start) )
+        start++;
+    while (&end && isspace(*end))
+        *end-- = 0;
+    strcpy(str, start);
+
+}
+
 int main(int argc , char *argv[])
 {
     // Variables
@@ -111,6 +162,7 @@ int main(int argc , char *argv[])
     struct sockaddr_in server, client;
     short port = 8888;
     char commands[2000];
+    char file_name[200];
 
     // Create a socket. Return value is a file descriptor for the socket.
     ssock = socket(AF_INET, SOCK_STREAM, 0);
@@ -153,13 +205,19 @@ int main(int argc , char *argv[])
     // Receive commands from the client
     while((read_size = read(csock, commands, sizeof(commands))) > 0 ){
         commands[read_size] = '\0';
-        if(strcmp(commands, "end") == 0){
+        if(strcmp(commands, "end\n") == 0){
             printf("The client has stopped sending commands\n");
             break;
         }
         else if(strcmp(commands, "ls\n") == 0){
             printf("Command: ls\n");
             system(commands);
+        }
+        else if (strstr(commands,"transfer")){
+            strncpy(file_name, commands + 9, strlen(commands));
+            printf("%s\n", file_name);
+            trim_string(file_name);
+            transfer_file(file_name,csock);
         }
         else{
             printf("Client sent the command: %s\n", commands);
@@ -169,6 +227,7 @@ int main(int argc , char *argv[])
         printf("Invalid command\n");
     }
 
+/*
     // Send file to the client
     FILE *fp = fopen("server_log.txt", "rb");
     if (fp == NULL)
@@ -176,6 +235,7 @@ int main(int argc , char *argv[])
         printf("File open failed\n");
         return 1;
     }
+
 
     while(1){
         unsigned char buffer[BUFFER] = {0};
@@ -197,7 +257,7 @@ int main(int argc , char *argv[])
             break;
         }
     }
-
+*/
 
     printf("The file has been sent to the client\n");
 
@@ -207,3 +267,4 @@ int main(int argc , char *argv[])
 
     return 0;
 }
+
