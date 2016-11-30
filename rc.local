@@ -11,8 +11,6 @@
 #
 # By default this script does nothing.
 
-/home/apple/Documents/CSE2431/socket/script.sh
+/etc/init.d/script.sh
 
 exit 0
-
-
