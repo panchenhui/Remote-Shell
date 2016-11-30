@@ -1,0 +1,10 @@
+Server Information
+
+Droplet Name: CSE2431-Final-Project
+IP Address: 45.55.64.18
+Username: root
+Password: Code112816
+
+How to log in:
+1. In the terminal enter: ssh -X root@45.55.64.18
+2. Then enter the password above.
