@@ -7,8 +7,7 @@
 #include <string.h>       // strlen
 #include <sys/socket.h>   // socket
 #include <arpa/inet.h>    // inet_addr
-#include <unistd.h>
-   // write
+#include <unistd.h>		  // write
 #include <fcntl.h>
 #include <ctype.h>
 
@@ -35,7 +34,7 @@ int main(int argc , char *argv[])
 {
     // Variables
     int sock, read_size,addrlen;
-    char recvBuff[1024], commands[2000];
+    char recvBuff[1024][1024], commands[2000];
     struct sockaddr_in server;
 
     //char *addr = "45.55.64.18";
@@ -74,6 +73,7 @@ int main(int argc , char *argv[])
     while(1){
         printf("Enter command: ");
         //gets(commands);
+        commands[2000] = '\0';
         fgets(commands,2000, stdin);
         printf(commands);
         if(strcmp(commands, "end\n") ==0) {
@@ -84,6 +84,41 @@ int main(int argc , char *argv[])
         else if (strlen(commands) <= 0){
             printf("Please enter an valid command\n");
         }
+
+        else if(strcmp(commands, "pwd\n") == 0){
+		   	write(sock, commands, strlen(commands));
+
+			int len = 0;
+			recv(sock, &len, sizeof(len), 0);
+			for(int i = 0; i < len; i++){
+				recv(sock, recvBuff[i], sizeof(recvBuff[i]), 0);
+				printf(recvBuff[i]);
+			}
+		}
+		else if(strcmp(commands, "ls\n") == 0)
+		{
+			write(sock, commands, strlen(commands));
+
+			int len = 0;
+			recv(sock, &len, sizeof(len), 0);
+			printf("Total number of files: %d\n", len);
+			for(int i = 0; i < len; i++){
+				recv(sock, recvBuff[i], sizeof(recvBuff[i]), 0);
+				printf(recvBuff[i]);
+			}
+		}
+		else if(strcmp(commands, "date\n") == 0)
+		{
+		   	write(sock, commands, strlen(commands));
+
+			int len = 0;
+			recv(sock, &len, sizeof(len), 0);
+			printf("%d\n", len);
+			for(int i = 0; i < len; i++){
+				recv(sock, recvBuff[i], sizeof(recvBuff[i]), 0);
+				printf(recvBuff[i]);
+			}
+		}
         else if (strstr(commands,"transfer"))
         {
         	strcpy(trans_commands,commands);

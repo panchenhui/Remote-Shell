@@ -12,7 +12,8 @@
 
 #define BUFFER 1024
 
-
+#include <netinet/in.h>
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/stat.h>	// file status 
 
@@ -74,6 +75,7 @@ int main(int argc , char *argv[])
     short port = 8888;
     char commands[2000];
     char file_name[200];
+    int end = 0, invalid_command = 0, sendLen = 1;
 
     // Create a socket. Return value is a file descriptor for the socket.
     ssock = socket(AF_INET, SOCK_STREAM, 0);
@@ -113,6 +115,11 @@ int main(int argc , char *argv[])
     }
     printf("Connection accepted\n");
 
+
+    char sendBuff[1024][1024];
+    FILE *pipein_fp, *pipeout_fp;
+    FILE *command_log = fopen("log.txt", "w");
+
     // Receive commands from the client
     while((read_size = read(csock, commands, sizeof(commands))) > 0 ){
         commands[read_size] = '\0';
@@ -123,16 +130,99 @@ int main(int argc , char *argv[])
         else if(strcmp(commands, "ls\n") == 0){
             printf("Command: ls\n");
             system(commands);
+
+            if((pipein_fp = popen("ls", "r")) == NULL)
+            {
+                perror("Cannot open the log file");
+                exit(1);
+            }
+
+            int num = 0; // record the time of sending
+             /* Processing loop */
+            while(fgets(sendBuff[num], sizeof(sendBuff), pipein_fp) != NULL){
+                fputs(sendBuff[num], command_log);
+                num++;
+            }
+
+            //send results back to client
+             send(csock, &num, sizeof(int), 0); // send the number of sending time
+            for(int i = 0; i < num; i++){
+                send(csock, sendBuff[i], sizeof(sendBuff[i]), 0);
+            }
+
+            /* Close the pipes */
+            pclose(pipein_fp);
         }
-        else if (strstr(commands,"transfer")){
+
+        else if (strstr(commands,"transfer"))
+        {
             strncpy(file_name, commands + 9, strlen(commands));
             printf("%s\n", file_name);
             trim_string(file_name);
             transfer_file(file_name,csock);
         }
+
+        else if(strcmp(commands, "pwd\n") == 0)
+        {
+            printf("Print working directory: \n");
+            system("pwd");
+
+                /* Create one way pipe line with call to popen() */
+            if((pipein_fp = popen("pwd", "r")) == NULL){
+                    perror("Cannot open the log file");
+                    exit(1);
+            }
+            int num = 0; // record the time of sending
+            /* Processing loop */
+            while(fgets(sendBuff[num], sizeof(sendBuff), pipein_fp) != NULL){
+                fputs(sendBuff[num], command_log);
+                num++;
+            }
+
+            //send results back to client
+            send(csock, &num, sizeof(int), 0); // send the number of sending time
+            for(int i = 0; i < num; i++){
+                send(csock, sendBuff[i], sizeof(sendBuff[i]), 0);
+            }
+
+            /* Close the pipes */
+            pclose(pipein_fp);
+
+            
+        }
+        // print current date
+        else if(strcmp(commands, "date\n") == 0)
+        {
+            printf("The date: \n");
+            system("date");
+
+                /* Create one way pipe line with call to popen() */
+            if((pipein_fp = popen("date", "r")) == NULL){
+                    perror("Cannot open the log file");
+                    exit(1);
+            }
+
+            int num = 0; // record the time of sending
+            /* Processing loop */
+            while(fgets(sendBuff[num], sizeof(sendBuff), pipein_fp) != NULL){
+                fputs(sendBuff[num], command_log);
+                num++;
+            }
+
+            //send results back to client
+            send(csock, &num, sizeof(int), 0); // send the number of sending time
+            for(int i = 0; i < num; i++){
+                send(csock, sendBuff[i], sizeof(sendBuff[i]), 0);
+            }
+
+            /* Close the pipes */
+            pclose(pipein_fp);
+        }
         else{
             printf("Client sent the command: %s\n", commands);
+            system(commands);
         }
+        
     }
     if(read_size == 0){
         printf("Invalid command\n");
@@ -141,6 +231,8 @@ int main(int argc , char *argv[])
 
     printf("The file has been sent to the client\n");
 
+    /* Close the pipes */
+    fclose(command_log);
     close(csock);
     close(ssock);
     printf("End connection\n");
