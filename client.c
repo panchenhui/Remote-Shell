@@ -123,6 +123,31 @@ int main(int argc , char *argv[])
         {
         	strcpy(trans_commands,commands);
         	write(sock, commands, strlen(commands));
+        	   
+        	strncpy(file_name, trans_commands + 9, strlen(trans_commands));
+            printf("%s\n", file_name);
+        	// Get file from server
+		    FILE *fp;
+		    printf("opening %s\n", file_name);
+		    fp = fopen(file_name,"ab");
+		    if(NULL == fp){
+		    	printf("Error opening file");
+		    	return 1;
+		    }
+
+		    printf("Fetching log file from server...\n");
+		    while((read_size = read(sock, recvBuff, 1024)) > 0 ){
+		    	printf("Bytes received %d\n", read_size);
+		    	fwrite(recvBuff, 1, read_size, fp);
+		    	printf("The info that we got :\n %s\n",recvBuff );
+		    	break;
+		    }
+		    if(recvBuff < 0){
+		    	printf("Read Error\n");
+		    }
+			printf("file closed\n");
+		    fclose(fp);
+
         }
         else{
             write(sock, commands, strlen(commands));
@@ -133,24 +158,6 @@ int main(int argc , char *argv[])
     printf("%s\n", file_name);
     trim_string(file_name);
 
-    // Get file from server
-    FILE *fp;
-    fp = fopen(file_name,"ab");
-    if(NULL == fp){
-    	printf("Error opening file");
-    	return 1;
-    }
-
-    printf("Fetching log file from server...\n");
-    while((read_size = read(sock, recvBuff, 1024)) > 0 ){
-    	printf("Bytes received %d\n", read_size);
-    	fwrite(recvBuff, 1, read_size, fp);
-    	printf("The info that we got :\n %s\n",recvBuff );
-    }
-
-    if(recvBuff < 0){
-    	printf("Read Error\n");
-    }
 
 
 

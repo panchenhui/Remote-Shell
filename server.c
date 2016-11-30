@@ -36,15 +36,18 @@ int transfer_file(char* file_name, int csock){
             write(csock,buffer,nread);
         }
 
-         if (nread < BUFFER)
+        if (nread < BUFFER)
         {
             if (feof(fp))
                 printf("End of file\n");
+            break;
             if (ferror(fp))
                 printf("Error reading\n");
-            break;
+            
         }
     }
+
+    fclose(fp);
 }
 
 
@@ -160,6 +163,8 @@ int main(int argc , char *argv[])
             printf("%s\n", file_name);
             trim_string(file_name);
             transfer_file(file_name,csock);
+            printf("The file has been sent to the client\n");
+            
         }
 
         else if(strcmp(commands, "pwd\n") == 0)
@@ -222,14 +227,12 @@ int main(int argc , char *argv[])
             printf("Client sent the command: %s\n", commands);
             system(commands);
         }
-        
+
     }
     if(read_size == 0){
         printf("Invalid command\n");
     }
-
-
-    printf("The file has been sent to the client\n");
+ 
 
     /* Close the pipes */
     fclose(command_log);
