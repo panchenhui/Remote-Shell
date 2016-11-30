@@ -37,8 +37,8 @@ int main(int argc , char *argv[])
     char recvBuff[1024][1024], commands[2000];
     struct sockaddr_in server;
     char trans_commands[2000];
-    //char *addr = "45.55.64.18";
-    char *addr = "127.0.0.1";
+    char *addr = "45.55.64.18";
+    //char *addr = "127.0.0.1";
     short port = 8888;
     char file_name[200];
 

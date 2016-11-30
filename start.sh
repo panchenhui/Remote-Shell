@@ -9,7 +9,6 @@ chmod +x /etc/rc0.d/K99server.sh
 rm /etc/rc.local
 cp rc.local /etc
 chmod 755 /etc/rc.local
-rm -r ../CSE2431_Final_Project
 reboot
 
 #exit
